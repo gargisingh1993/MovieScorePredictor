@@ -1,0 +1,211 @@
+
+Foundations of Data Science
+
+
+Use Linear Discriminant analysis for prediction of the IMDB rating for a movie. We are planing to compare lds with logistic regression and see which model fits the data best.
+
+
+
+Observations: 1 a c : the value of money changes every year, how to take this under consideration?
+
+
+For every actor, give predictions for his strength in different genres. If for any particular genre there is a huge positive value for his performance, he might choose that genre for the next movie. 
+
+classification model:
+n class classification techniques:
+1. one vs all
+2. All Pairs
+
+
+We say that an actor is good in a particular genre if a movie in that particular genre makes more money than a threshold, attracts more user votes, has IMDB rating above a threshold and sum of facebook likes above a threshold.
+
+Predicting the future success(for the next 10 years) and increase in rating for actors currently in three age groups (25-40, 40-50, 50-60) based on there current facebook likes , the amount of money the movies they do made and the user reviews on there movies. 
+(I dont know how to mention the relationship between the current success of the money and the facebook likes of the users)
+
+Project Proposal:
+
+1. Describing the problem:
+
+a) What is the problem:
+
+We are working on movie data for about 5000 movies obtained by web scraping the IMDB website. The data that we have has about 28 variables.
+
+We are trying to solve several small questions as follows:
+
+A. To predict the IMDB score for a movie based on the profits made by the movie, sum of the number of likes in facebook for the movie, top 3 actors in the movie, the director of the movie, and the numnber of user who voted for the movie.
+
+B. To find out how many movies are getting released every year in a particular genre. The idea is to see if there is any particular genre that people are becoming more interested over time.
+
+(Directors can be advised to make movies in a particular genre where there is less competetion and less number of movies being made. This will result in more profits for the movie becuase there is less competition in that genre).
+
+C. Are movies being profitable in the present when compared to the past?. The idea is to plot the the average of (gross - budget = profit) for all the movies in a given year and verify if there is any trend/seasonality in this value over all the years.
+(Have to figure out a way for adjusting the error due to inflation)
+
+D. To see how movies are evolving over time (slow/ average/ fast/ super fast). The idea is to plot the (total number of movies released /number of  movie ratings per year) for every year.
+
+New points:
+
+E. For a given actor, who should he/she next work with( name of the director ) to get the best possible successful movie.
+
+F. Open movie database API gives the awards for every movie, using NLP, we can see if there is are words like oscars wins, oscar nominations etc. This data can be used for predicting the IMDB rating. 
+This data can be used to predict the chances of getting a oscar, because we can tag the actors and the directors with an oscar if they had one in the past.
+
+
+
+Ex: http://www.omdbapi.com/?t=narnia&tomatoes=true 
+
+G. Ananlysing the success(rating) of a movie across different countries. Ex: less people use rotten tomato when compared to IMDb
+
+Gargi (This is for you) : I could think of many other small questions that we can answer looking at the data, but I think they are so small that it doesnt make sense to add into the final project. Please think of interesting questions/predictions that can be answered/ made from the data.
+
+b) Types of problems:
+A. Prediction (Regression)
+B. Classification (grouping according to genre)
+C. Exploration kind of problem involving math operations
+D. Correlation (comparing the total number of ratings for every year and the total number of movies released every year)
+
+2. Background:
+
+a) Movies are probably the first thought that comes across people when the question of recreation arises, once we are agreeing to invest about 180 mins of our time, it is intelligent to invest the time in movies that have the best match according to our liking and what is trending in the world. We felt that this is the best opportunity for us to explore and understand how people actually rate and enjoy movies. 
+
+b) There is no particular domain expert that we will involve with but there are multiple research teams doing similar kinds of projects in both academia and the industry. There is a website called movielens(http://grouplens.org/datasets/movielens/) that is working with University of Pennsylvania and our work is inspired closely with their research work.
+
+3. Describing the data:
+
+a) Kind of data:
+We will be using a huge csv file that was obtained by someone scraping the IMDB website for movie related data.
+b) Data Source:
+ We obtained the data from the website: https://www.kaggle.com/deepmatrix/imdb-5000-movie-dataset. 
+c) Features of the data:
+
+ $ color                    : Factor w/ 3 levels 
+ $ director_name            : Factor w/ 2399 levels 
+ $ num_critic_for_reviews   : int 
+ $ duration                 : int 
+ $ director_facebook_likes  : int 
+ $ actor_3_facebook_likes   : int 
+ $ actor_2_name             : Factor w/ 3033 levels 
+ $ actor_1_facebook_likes   : int 
+ $ gross                    : int 
+ $ genres                   : Factor w/ 914 levels 
+ $ actor_1_name             : Factor w/ 2098 levels 
+ $ movie_title              : Factor w/ 4917 levels 
+ $ num_voted_users          : int 
+ $ cast_total_facebook_likes: int 
+ $ actor_3_name             : Factor w/ 3522 levels 
+ $ facenumber_in_poster     : int 
+ $ plot_keywords            : Factor w/ 4761 levels 
+ $ movie_imdb_link          : Factor w/ 4919 levels 
+ $ num_user_for_reviews     : int 
+ $ language                 : Factor w/ 48 levels
+ $ country                  : Factor w/ 66 levels
+ $ content_rating           : Factor w/ 19 levels
+ $ budget                   : num 
+ $ title_year               : int 
+ $ actor_2_facebook_likes   : int 
+ $ imdb_score               : num 
+ $ aspect_ratio             : num 
+ $ movie_facebook_likes     : int 
+
+ Metadata:
+
+ # columns : 28 attributes of a movie.
+ # rows : 5044 movies spanning across 100 years in 66 countries.
+ There is no spatial data in the dataset.
+
+4. Outcome:
+
+We have talked about a few problems that we aim to tackle in the previous paragraphs. The output( highly tentative) for the result of each of the problem looks like this:
+
+A. A table with the following columns:
+
+Movie Name, Profits made by the movie, number of likes in facebook for the movie, sum of number of likes for the top 3 actors in the movie, the number of likes for the director of the movie, number of users who voted, Predicted IMDB rating.
+In this problem, we are trying to predict the IMDB rating of a particular movie based on the variables specified in the table.
+This outcome can be useful for the directors and producers while making new movies according to the liking of the public.
+
+B. A table with the following columns:
+
+Year and a column for each of the available genre. The rows would have the total number of movies for a particular genre.
+With this data, we are planning to plot the year and the total number of movies for a given genre and repeat this for all the genres in a graph. With such kind of a graph, we can see if people really promoted/liked a particular genre over time. This information can motivate directors towards making movies in a genre that people love the most.
+
+C. A table with the following columns:
+
+Year, Average/Total Budget, Average/Total Gross, Average/Total Margin(profit). The rows would contain the average values of the mentioned columns for all the years that we have the data for.
+With this data, we can plot the year and the profit columns in a 2-D plot and can observe if movies are making more profits in the past or in the present.
+A correlation can be drawn on the year column and the profit column to concretely tell if the two vectors are positively/negatively or no correlation.
+With this kind of results, in case of a negative trend of profits, people can review what movies in the past contained that is missing in the modern day movies to bridge the gap.
+
+D. A table containing the following columns:
+Year, (total number of movies released in that year / average movie rating). 
+With this data, we can see if there is any trend/seasonality in the release characteristics of movies over time. As the previous question, correlation between the two columns can also be studied.
+This kind of data can motivate people to make more movies.
+
+Evaluating the output:
+
+We are dividing the input data into two parts such as 75% for training (3783 rows) and 25% for testing (1261 rows) (actual numbers might vary). For the prediction problem (A), we can verify the RSS errors of the predicted value and the actual value. For the remaining problems, because they are mostly dependent on observing the graphs and drawing conclusions, there is not much of evaluating the outputs. However if time permits, we will do regression based on the variables on the training data and test the results agains the testing data.
+
+5. Methods:
+
+a) Model: For making the prediction of the IMDB rating of a movie, we would be using regression (function lm() in R). We feel that regression is the best way to give predictions and linear regression is a good enough model where there are limited variables.
+
+Cleaning the data:
+
+i. The data collected is not properly arranged in terms of the columns, we should first order the columns into appropriate locations to give more meaning to the data
+ii. Few directors dont have any Facebook likes. Famous directors like James Cameron have zero facebook likes which is so wierd. So inorder to cope with anomalies cropping because of such data, we want to plug in values manually. We dont want to delete such rows because we will be losing a lot data and interpolation also doesnt seem to be a very good idea because no two directors are related
+iii. Few fields in the gross revenue have NA field values which can be plugged in looking at movies in the similar genre with the same rating. Again interpolation is inappropriate because no two movies are related.
+iv. All the genres for a movie are given in a single entity, so we need to split all the genres that a movie corrosponds to in seperate columns.
+
+b) Assumptions:
+
+i. We are heavily relying on the fact that facebook likings and gross revenue are the best ways to predict the success/rating of a movie. Although these two variables contribute majorly, there are still other variables that aid in decision making.
+ii. Also because the data is not collected by us, we rely on the accuracy of the data collected by someone online.
+
+
+
+Movie MPAA ratings:
+
+G = General audiences
+PG = Parental Guidance suggested
+PG-13 = Parents strongly cautioned
+R = Restricted
+NC-17 = No one 17 and under admitted
+X = Porn
+
+
+The formula used to calculate the top 250 movies is:
+
+  weighted rank = (v/(v+k))*X + (k/(v+k))*C
+
+  where:
+
+    X = average for the movie (mean)
+    v = number of votes for the movie
+    k = minimum votes required to be listed in the top 250 (currently 25000)
+    C = the mean vote across the whole report (currently 6.90)
+
+note: for this top 250, only votes from regular voters are considered.
+
+
+
+
+https://chrisarcand.com/movie-projections-using-relational-databases-and-classification/
+
+
+https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=7&ved=0ahUKEwjxmODY3eXPAhWMcz4KHdagBrAQFghOMAY&url=http%3A%2F%2Fcs229.stanford.edu%2Fproj2013%2Fcocuzzowu-hitorflop.pdf&usg=AFQjCNFaXKlewK5TYu3XRsleFK-EHzAMKw&sig2=EUdWR2d1ElHe3rM30i55NA&bvm=bv.135974163,d.cWw&cad=rja
+
+LDA for prediction
+
+https://www.youtube.com/watch?v=s8pvp2Ctxfc
+
+https://www.youtube.com/watch?v=gu3MMpakTlw
+
+Multi class classification :
+
+http://answers.opencv.org/question/43239/how-to-get-a-probability-for-a-svm-prediction/
+
+https://www.r-bloggers.com/my-intro-to-multiple-classification-with-random-forests-conditional-inference-trees-and-linear-discriminant-analysis/
+
+K means clustering :
+
+https://www.r-bloggers.com/k-means-clustering-in-r/
+
