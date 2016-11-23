@@ -1,0 +1,78 @@
+---
+title: "Project"
+author: "Kiran Karpurapu"
+date: "11/22/2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# setting up the libraries
+library(gdata)
+```
+
+```{r}
+# setting the working directory
+# /Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data
+setwd('/Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data/')
+movieData = read.xls("movie_data.xls")
+head(movieData)
+```
+
+Loaded the data into a data frame 'movieData'
+
+```{r}
+# identifying top 10 genres out of all the 26 genres to make the work more focussed
+
+# gernes present in the data:
+# 'Sci-Fi', 'Crime', Romance', Animation', Music', Comedy', War', genres', Horror', Film-Noir', Adventure', News', Reality-TV', Thriller', Western', Mystery', Short', Drama', Action', Documentary', Musical', History', Family', Fantasy', Game-Show', Sport', Biography'
+
+movieCount <- c()
+
+for(i in 38:64)
+{
+  movieCount[i - 37] = sum(movieData[,i]);
+}
+movieCount
+
+genreNames <- as.vector(colnames(movieData)[38:64])
+genreNames
+
+genreNames <- as.vector(genreNames)
+
+genreMovieCount <- data.frame(genreNames, movieCount)
+plot(genreMovieCount$genreNames, genreMovieCount$movieCount, main="Genre Distribution",	xlab="Genre ", ylab=" Movies Made")
+```
+
+We can see that not all the genres have a considerable number of movies made in them, so we decided to extract the top 11 genres that have the most number of movies made in those particular genres.
+
+```{r}
+genreMovieCountSorted <- genreMovieCount[order(-movieCount),] 
+genreMovieCountSorted <- genreMovieCountSorted[c(1:10),]
+```
+
+Now we have to remove the data for all the other genres from the data set, also we can delete the last column from the data set because it is repeated
+```{r}
+
+movieData <- movieData[,-65]
+columnNames <- colnames(movieData)
+columnNames <- columnNames[1:37]
+
+selectedNames <- genreMovieCountSorted$genreNames
+
+columnNames <- as.vector(columnNames)
+selectedNames <- as.vector(selectedNames)
+
+names <- c(columnNames, selectedNames)
+names
+
+movieData1 <- subset(movieData, select = names)
+for(i in 38:47)
+{
+  print(c(colnames(movieData1[i]), sum(movieData1[,i])));
+}
+
+```
