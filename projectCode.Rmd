@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 # setting up the libraries
 library(gdata)
+library(car)
 ```
 
 ```{r}
@@ -118,5 +119,88 @@ row.has.na <- apply(movieData2, 1, function(x){any(is.na(x))})
 numberOfNAs <- sum(row.has.na)
 print(c("There are ",numberOfNAs, " rows with empty cells, so we are removing them"))
 movieData2 <- na.omit(movieData2)
+```
+
+
+```{r}
+#couting the profits of a movie by subtracting the budget from the gross
+movieData2$profits <- movieData2$gross - movieData2$budget
+movieData3 <- movieData2[,c(c(1:13),48, c(14:47))]
+```
+
+
+```{r}
+
+#coverting factor to int array
+movieData3$tomatoUserRating <- as.numeric(as.character(movieData3$tomatoUserRating))
+movieData3$tomatoRating <- as.numeric(as.character(movieData3$tomatoRating))
+movieData3$tomatoReviews <- as.numeric(as.character(movieData3$tomatoReviews))
+movieData3$tomatoFresh <- as.numeric(as.character(movieData3$tomatoFresh))
+movieData3$tomatoRotten <- as.numeric(as.character(movieData3$tomatoRotten))
+movieData3$tomatoUserMeter <- as.numeric(as.character(movieData3$tomatoUserMeter))
+movieData3$tomatoUserReviews <- as.numeric(as.character(movieData3$tomatoUserReviews))
+movieData3$imdbVotes <- as.numeric(as.character(movieData3$imdbVotes))
+movieData3$Metascore <- as.numeric(as.character(movieData3$Metascore))
+```
+
+```{r}
+# checking the correlation
+str(movieData3)
+cor(movieData3$imdb_score, movieData3[,c(7,12:26,38)], use = "pairwise.complete.obs")
+```
+
+```{r}
+cNames <- paste("movieData3$",colnames(movieData3)[c(7,12:26,38)], sep = "")
+cNames
+#formula contains all the columns that we want to include in the model
+formula <- as.formula(paste("y ~ ", paste(cNames, collapse= "+")))
+formula
+```
+
+
+```{r}
+#choice of linear regression vs logistic regression
+# Linear regression: When the outcome(dependent variable) is continuous, i.e. infinite number of possibilities.
+# Logistic regression: When the outcome(dependent variable) has a limited set of values.
+
+#because we are trying to predict the IMDB score of a movie and theoritically the score can have an infinite number of possibilities, we are chosing linear regression over logisitic regression
+#linear regression
+
+
+lmfit1.movieData <- lm(movieData3$imdb_score ~ movieData3$cast_total_facebook_likes + movieData3$gross + movieData3$budget + movieData3$num_critic_for_reviews +movieData3$num_user_for_reviews + movieData3$tomatoUserRating + + movieData3$tomatoRating + movieData3$tomatoReviews + movieData3$tomatoFresh + movieData3$tomatoUserMeter + movieData3$tomatoUserReviews + movieData3$num_voted_users +  movieData3$imdbVotes + movieData3$duration ,data = movieData3)
+
+summary(lmfit1.movieData)
+
+vif(lmfit1.movieData)
+```
+Looking at the Variance Inflation Factor of the fitted model, we can see that imdbVotes and num_voted_users are two largest VIFs. so we try to eliminate them and make the model again.
+
+```{r}
+ lmfit2.movieData <- lm(movieData3$imdb_score ~ movieData3$cast_total_facebook_likes + movieData3$gross + movieData3$budget + movieData3$num_critic_for_reviews +movieData3$num_user_for_reviews + movieData3$tomatoUserRating + + movieData3$tomatoRating + movieData3$tomatoReviews + movieData3$tomatoFresh + movieData3$tomatoUserMeter + movieData3$tomatoUserReviews + movieData3$duration ,data = movieData3)
+
+summary(lmfit2.movieData)
+
+vif(lmfit2.movieData)
+# we can see that the std error for the parameter estimates gets smaller.
+```
+
+```{r}
+#calculating the MSFE and MAD for the predicted values
+predictedScore <- predict(lmfit2.movieData)
+predictedScore
+RSFE_v <- movieData3$imdb_score - predictedScore
+RSFE_v
+RSFE <- sum(RSFE_v)
+RSFE
+absRSFE <- abs(RSFE)
+absRSFE
+length(RSFE_v)
+MAD <- absRSFE / length(RSFE_v)
+MAD
+print(c("Mean Absolute Deviation" , MAD))
+```
+
+```{r}
+# Now that the lm model came out satisfactory, we can test the model by dividing the movieData into training and testing sets.
 
 ```
