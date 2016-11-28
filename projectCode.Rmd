@@ -52,6 +52,8 @@ We can see that not all the genres have a considerable number of movies made in 
 ```{r}
 genreMovieCountSorted <- genreMovieCount[order(-movieCount),] 
 genreMovieCountSorted <- genreMovieCountSorted[c(1:10),]
+plot(genreMovieCountSorted$genreNames, genreMovieCountSorted$movieCount, main="Filtered Genre Distribution",	xlab="Genre ", ylab=" Movies Made")
+
 ```
 
 Now we have to remove the data for all the other genres from the data set, also we can delete the last column from the data set because it is repeated
@@ -70,9 +72,51 @@ names <- c(columnNames, selectedNames)
 names
 
 movieData1 <- subset(movieData, select = names)
-for(i in 38:47)
-{
-  print(c(colnames(movieData1[i]), sum(movieData1[,i])));
+# for(i in 38:47)
+# {
+#   print(c(colnames(movieData1[i]), sum(movieData1[,i])));
+# }
+```
+Now movieData1 has the data about the genres that we are interested only. The next step is to clean the data by removing rows that dont have a considerable amount of data. If the facebook likes are missing, we can get those details from other rows. (Although the likes number is not constant, this approach can give us a decent estimate of the number of likes).
+
+```{r}
+
+row.has.na <- apply(movieData1, 1, function(x){any(is.na(x))})
+numberOfNAs <- sum(row.has.na)
+
+print (c("can remove ", numberOfNAs , "from the table"))
+movieData1 <- na.omit(movieData1)
+```
+
+```{r}
+NAcounter <- 0
+indicesToRemove <- c()
+index <- 1
+# this is the working version 
+for (i in 1 : nrow(movieData1)) {
+  if (any(movieData1[i,] == "N/A")) {
+     print (c(i, "yes" , movieData1[i,]))
+    indicesToRemove[index] = i;
+    index <- index + 1
+    NAcounter <- NAcounter + 1
+  } else
+    print ("no")
 }
+
+print(length(indicesToRemove))
+print(indicesToRemove)
+print(c("total number of nulls", NAcounter))
+```
+
+```{r}
+#removing the rows that have NA in them
+movieData2 <- movieData1[-indicesToRemove,]
+# Now, movieData2 has no NA in any of the rows.
+
+movieData2[movieData2==""] <- NA
+row.has.na <- apply(movieData2, 1, function(x){any(is.na(x))})
+numberOfNAs <- sum(row.has.na)
+print(c("There are ",numberOfNAs, " rows with empty cells, so we are removing them"))
+movieData2 <- na.omit(movieData2)
 
 ```
