@@ -5,14 +5,19 @@ date: "11/22/2016"
 output: pdf_document
 ---
 
+<!-- https://rstudio-pubs-static.s3.amazonaws.com/33876_1d7794d9a86647ca90c4f182df93f0e8.html -->
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
 # setting up the libraries
+# require(caTools)
 library(gdata)
 library(car)
+library(caret)
+library(caTools)
 ```
 
 ```{r}
@@ -201,6 +206,70 @@ print(c("Mean Absolute Deviation" , MAD))
 ```
 
 ```{r}
-# Now that the lm model came out satisfactory, we can test the model by dividing the movieData into training and testing sets.
+# Analysing the linear regression model
+```
 
+```{r}
+
+wssplot <- function(data, nc=15, seed=1234) {
+  wss <- (nrow(data)-1)*sum(apply(data,2,var))
+  bss <- (nrow(data)-1)*sum(apply(data,2,var))
+  for (i in 2:nc) {
+    set.seed(seed)
+    wss[i] <- sum(kmeans(data[,c(7,12:26,38)], centers=i)$withinss)
+    bss[i] <- sum(kmeans(data[,c(7,12:26,38)], centers=i)$betweenss)
+    }
+  
+  plot(1:nc, wss, type="b", xlab="Number of Clusters",
+       ylab="Within groups sum of squares")
+  plot(1:nc, bss, type="b", xlab="Number of Clusters",
+       ylab="Between groups sum of squares")
+  }
+
+wssplot(movieData3, nc=35) 
+```
+
+```{r}
+set.seed(101) 
+sample = sample.split(movieData3, SplitRatio = .75)
+train = subset(movieData3, sample == TRUE)
+test = subset(movieData3, sample == FALSE)
+```
+
+```{r}
+#using Kmeans clustering
+
+dim(train)
+k.means.fit <- kmeans(train[,c(7,12:26,38)], 20)
+attributes(k.means.fit)
+k.means.fit$centers
+k.means.fit$cluster
+k.means.fit$size
+
+kmeansPrediction <- as.data.frame(k.means.fit$centers)
+kmeansPrediction <- kmeansPrediction[,5]
+kmeansPrediction
+
+
+closest.cluster <- function(x) {
+  cluster.dist <- apply(k.means.fit$centers, 1, function(y) sqrt(sum((x-y)^2)))
+  print(c( "cluster: " ,(which.min(cluster.dist)[1]), kmeansPrediction[which.min(cluster.dist)[1]]))
+  print( kmeansPrediction[which.min(cluster.dist)[1]])
+  return (kmeansPrediction[which.min(cluster.dist)[1]])
+}
+
+clusters2 <- apply(test[,c(7,12:26,38)], 1, closest.cluster)
+
+
+RSFE_v1 <- test$imdb_score - clusters2
+RSFE_v1
+RSFE1 <- sum(RSFE_v1)
+RSFE1
+absRSFE1 <- abs(RSFE1)
+absRSFE1
+length(RSFE_v1)
+MAD1 <- absRSFE1 / length(RSFE_v1)
+MAD1
+print(c("Mean Absolute Deviation for prediction using K means clustering" , MAD1))
+print(c("Mean Absolute Deviation for prediction using Linear Regression" , MAD))
 ```
