@@ -18,6 +18,7 @@ library(gdata)
 library(car)
 library(caret)
 library(caTools)
+library(ggbiplot,vqv)
 ```
 
 ```{r}
@@ -185,6 +186,8 @@ Looking at the Variance Inflation Factor of the fitted model, we can see that im
 
 summary(lmfit2.movieData)
 
+lmfit2.movieData
+
 vif(lmfit2.movieData)
 # we can see that the std error for the parameter estimates gets smaller.
 ```
@@ -207,6 +210,19 @@ print(c("Mean Absolute Deviation" , MAD))
 
 ```{r}
 # Analysing the linear regression model
+
+# log.movieData <- log(movieData3[, c(7,12:26,38)])
+
+
+trans = preProcess(movieData3[,c(7,12:26,38)], method=c("BoxCox", "center", "scale", "pca"))
+trans
+trans$pcaComp
+
+pca.movieData <- prcomp(movieData3[,c(7,12:26,38)], center = TRUE, scale. = TRUE) 
+print(pca.movieData)
+colnames(pca.movieData$rotation)
+summary(pca.movieData)
+plot(pca.movieData, type = "l")
 ```
 
 ```{r}
@@ -250,7 +266,6 @@ kmeansPrediction <- as.data.frame(k.means.fit$centers)
 kmeansPrediction <- kmeansPrediction[,5]
 kmeansPrediction
 
-
 closest.cluster <- function(x) {
   cluster.dist <- apply(k.means.fit$centers, 1, function(y) sqrt(sum((x-y)^2)))
   print(c( "cluster: " ,(which.min(cluster.dist)[1]), kmeansPrediction[which.min(cluster.dist)[1]]))
@@ -259,7 +274,6 @@ closest.cluster <- function(x) {
 }
 
 clusters2 <- apply(test[,c(7,12:26,38)], 1, closest.cluster)
-
 
 RSFE_v1 <- test$imdb_score - clusters2
 RSFE_v1
