@@ -5,6 +5,9 @@ date: "11/22/2016"
 output: pdf_document
 ---
 
+
+# GAM model general additive model
+# log linear regression
 <!-- https://rstudio-pubs-static.s3.amazonaws.com/33876_1d7794d9a86647ca90c4f182df93f0e8.html -->
 
 ```{r setup, include=FALSE}
@@ -14,11 +17,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 # setting up the libraries
 # require(caTools)
+# install.packages('randomForest')
 library(gdata)
 library(car)
 library(caret)
 library(caTools)
 library(ggbiplot,vqv)
+library(randomForest)
 ```
 
 ```{r}
@@ -88,6 +93,8 @@ Now movieData1 has the data about the genres that we are interested only. The ne
 
 ```{r}
 
+mean(is.na(movieData))
+print(c("only", mean(is.na(movieData)), " amount of data is null, so we can safely remove NAs"))
 row.has.na <- apply(movieData1, 1, function(x){any(is.na(x))})
 numberOfNAs <- sum(row.has.na)
 
@@ -132,6 +139,8 @@ movieData2 <- na.omit(movieData2)
 #couting the profits of a movie by subtracting the budget from the gross
 movieData2$profits <- movieData2$gross - movieData2$budget
 movieData3 <- movieData2[,c(c(1:13),48, c(14:47))]
+nearZeroVar(movieData3, saveMetrics = T)
+# We can see that none of the varibles have zero variance, so we can consider all the variables for study
 ```
 
 
@@ -275,6 +284,10 @@ closest.cluster <- function(x) {
 
 clusters2 <- apply(test[,c(7,12:26,38)], 1, closest.cluster)
 
+```
+
+```{r}
+# analysis of k means clustering approach
 RSFE_v1 <- test$imdb_score - clusters2
 RSFE_v1
 RSFE1 <- sum(RSFE_v1)
@@ -284,6 +297,42 @@ absRSFE1
 length(RSFE_v1)
 MAD1 <- absRSFE1 / length(RSFE_v1)
 MAD1
+print(c("Mean Absolute Deviation for prediction using K means clustering" , MAD1))
+print(c("Mean Absolute Deviation for prediction using Linear Regression" , MAD))
+```
+
+```{r}
+#Using random forests for predicting the IMDB score
+
+set.seed(7)
+rfdf <- movieData3[sample(nrow(movieData3)), ]
+rf.train <- rfdf[1:2200,]
+rf.test <- rfdf[2201:nrow(rfdf), ]
+
+set.seed(5)
+
+rf.rfModel <- randomForest(rfdf$imdb_score ~ rfdf$cast_total_facebook_likes + rfdf$gross + rfdf$budget + rfdf$num_critic_for_reviews +rfdf$num_user_for_reviews + rfdf$tomatoUserRating + + rfdf$tomatoRating + rfdf$tomatoReviews + rfdf$tomatoFresh + rfdf$tomatoUserMeter + rfdf$tomatoUserReviews + rfdf$duration, data = rf.train, mtry = 5)
+
+rf.rfModel
+```
+
+```{r}
+#validating the random forest model
+#RMSE
+rf.predictedValues <- predict(rf.rfModel, rfdf)
+rf.predictedValues
+
+
+RSFE_v2 <- rfdf$imdb_score - rf.predictedValues
+RSFE_v2
+RSFE2 <- sum(RSFE_v2)
+RSFE2
+absRSFE2 <- abs(RSFE2)
+absRSFE2
+length(RSFE_v1)
+MAD2 <- absRSFE2 / length(RSFE_v2)
+
+print(c("Mean Absolute Deviation for prediction using random forests" , MAD2))
 print(c("Mean Absolute Deviation for prediction using K means clustering" , MAD1))
 print(c("Mean Absolute Deviation for prediction using Linear Regression" , MAD))
 ```
