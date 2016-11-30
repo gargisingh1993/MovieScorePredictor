@@ -1,22 +1,25 @@
-setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor')
-# setting the working directory
-# C:/Users/gogs/Documents/GitHub
-setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor')
-movieData = read.csv("cleanedMovieData.csv")
-head(movieData)
-"1. select 10 genres from all the genres which have moste movies made in them -> done
-2. Now for a particular genre, we find all the movies in the genre ->done
-3. From all the movies in this genre, we find all the actors who acted in this genre -> done
-4. now for a particular actor, we get all the movies in this genre -> pending
-5. Say for actor A, we get 10 movies
-6. Now we can classify all the 10 movies by giving every movie a label from 1 to 10. This label is the goodness of the movie.
-7. We can average the movie goodness for all the 10 movies to get the goodness of the actor in this particular genre.
-8. We repeat this process for about 10 actors in about 10 genres.
-9. Now for a actor, we have his goodness rating in all the 10 genres. Using this data, the actor can pick a genre for his next movie.
-10. This approach can be extended with a pair of actors and repeating steps from 5.(Idea given by professor.
-Problem: We have very less data when we take the combination of actors because at max there are 5 - 10 movies in common for a pair of actors)
-11. This approach can be extended with a pair of genres for a particular actor
-12. Professor also talked about network analysis, we have no idea about how to approach this problem. Idea is that we have to draw a network diagram where a pair of successful actors in a genre are closer and two actors who never worked together in a genre are very far away in the diagram."
+---
+title: "Project"
+author: "Gargi Singh"
+date: "November 29, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# setting up the libraries
+# require(caTools)
+library(gdata)
+library(car)
+library(caret)
+library(caTools)
+library(ggbiplot,vqv)
+```
+
+```{r}
 # setting the working directory
 # C:/Users/gogs/Documents/GitHub
 setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data')
@@ -35,22 +38,57 @@ head(movieData)
 Problem: We have very less data when we take the combination of actors because at max there are 5 - 10 movies in common for a pair of actors)
 11. This approach can be extended with a pair of genres for a particular actor
 12. Professor also talked about network analysis, we have no idea about how to approach this problem. Idea is that we have to draw a network diagram where a pair of successful actors in a genre are closer and two actors who never worked together in a genre are very far away in the diagram."
+
+```
+
+```{r}
 #List of all the actors in that genre, primary,secondary and supporting actors
 vector1 <- list()
 for(i in colnames(movieData[c(40:49)])){
 vector1[[i]] <- which(grepl(1,movieData[[i]]))
 }
+
 vector3 <- list()
 for (i in names(vector1)){
-count = 1
-for(j in vector1[[i]]){
-vector3[[count]] <- c(as.character((movieData[j,c(10)])),as.character((movieData[j,c(11)])),as.character((movieData[j,c(12)])),i)
-count = count +1
-}
+  count = 1
+  for(j in vector1[[i]]){
+    vector3[[count]] <- c(as.character((movieData[j,c(10)])),as.character((movieData[j,c(11)])),as.character((movieData[j,c(12)])),i)
+    count = count +1
+  }
 }
 ## Vector3 has all the actors and genre related information, i.e which actors are a part of different genre's
 vector3 <- as.data.frame(vector3)
 vector3 <- as.data.frame(t(x = vector3))
 colnames(vector3)<- c("actor1","actor2","actor3","genre")
 row.names(vector3) <- c(1:1559)
-View(vector3)
+```
+
+```{r}
+# Find all the movies done by that actor in one genre ->  this part is not clear , how to loop both the dataframes at once.
+
+vector5 <- c()
+vector3$genre <- as.character(vector3$genre)
+count1 = 1
+for(i in colnames(vector3[1:3])){
+  for(j in vector3[[i]]){
+    for(k in colnames(movieData[])){
+      
+    }
+    }
+}
+'lapply(vector3[,c(1)], function(x){print(which(grepl(x,(movieData[,c(10)]))))})'
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
