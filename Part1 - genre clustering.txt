@@ -1,0 +1,29 @@
+1. select 10 genres from all the genres which have moste movies made in them -> done
+
+2. Now for a particular genre, we find all the movies in the genre ->done
+
+3. From all the movies in this genre, we find all the actors who acted in this genre -> done
+
+4. now for a particular actor, we get all the movies in this genre -> pending
+
+4.1 - I have a data frame vector3 which contains c(actor1, actor2, actor3, genre)
+4.2 - I need to find all the movies done by an actor in a particular genre , say horror or comedy [a dataframe which contains actor name , the movies of one particular genre , and the genre] from moviedata.
+4.3 - We have to match the genre column of vector3 and moviedata, so that we get the movies of that particular genre , done by an actor say abc
+4.4 - Once we have this data frame we can proceed with clustering
+
+
+
+
+
+
+5. Say for actor A, we get 10 movies
+6. Now we can classify all the 10 movies by giving every movie a label from 1 to 10. This label is the goodness of the movie.
+7. We can average the movie goodness for all the 10 movies to get the goodness of the actor in this particular genre.
+8. We repeat this process for about 10 actors in about 10 genres.1. select 10 genres from all the genres which have moste movies made in them -> done
+2. Now for a particular genre, we find all the movies in the genre ->done
+3. From all the movies in this genre, we find all the actors who acted in this genre -> done
+4. now for a particular actor, we get all the movies in this genre -> pending
+5. Say for actor A, we get 10 movies
+6. Now we can classify all the 10 movies by giving every movie a label from 1 to 10. This label is the goodness of the movie.
+7. We can average the movie goodness for all the 10 movies to get the goodness of the actor in this particular genre.
+8. We repeat this process for about 10 actors in about 10 genres.
