@@ -1,0 +1,8 @@
+Notes:
+
+
+1. We make 10 buckets each for 10 genres.
+2. Each bucket is for a genre and contains the actors who did well in this particular genre.
+3. To group actors based on genres, we will use a clustering algorithm to group actors who did well in a particular genre. (for a measure to build the clusters upon, we can come up with, for every actor, his average profits, his total fb likes , average ratings for his movies etc. so every row now corrosponds to a actor and his details.) For a given pair of actors, we can calculate the distance between them based on all the attributes of the actor (We want some extra attributes for every actor like the age, gender, nationality, number of awards etc for a better distance measure).
+4. So now all the 10 buckets (each corrosponding to a single genre) contain several actors who made movies in the genre. The cluster representative can be the average of all the values of all the actors in the cluster.
+5. With this information, for an actor who wants to do a new movie, we can see which cluster he might fall into. The cluster which the incoming actor belongs to tells the next genre the actor should do a movie in.

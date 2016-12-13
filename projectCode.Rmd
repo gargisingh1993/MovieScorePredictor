@@ -31,7 +31,7 @@ library(randomForest)
 # /Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data
 setwd('/Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data/')
 movieData = read.xls("movie_data.xls")
-head(movieData)
+# head(movieData)
 ```
 
 Loaded the data into a data frame 'movieData'
@@ -89,16 +89,20 @@ movieData1 <- subset(movieData, select = names)
 #   print(c(colnames(movieData1[i]), sum(movieData1[,i])));
 # }
 ```
-Now movieData1 has the data about the genres that we are interested only. The next step is to clean the data by removing rows that dont have a considerable amount of data. If the facebook likes are missing, we can get those details from other rows. (Although the likes number is not constant, this approach can give us a decent estimate of the number of likes).
+Now movieData1 has the data about the genres that we are interested only. The next step is to clean the data by removing rows that dont have a considerable amount of data. If the facebook likes are missing, although we can get those details from other row, we are not proceeding so because the number of facebook likes are always changing and fetching data from other rows might not be a very good estimate for plugging in missing likes data.
+
+Note: The facebook data is present in the data itself, we didnt have to fetch the data manually.
 
 ```{r}
 
 mean(is.na(movieData))
-print(c("only", mean(is.na(movieData)), " amount of data is null, so we can safely remove NAs"))
+paste("only", mean(is.na(movieData)), " (mean) amount of data is null, so we can safely remove NAs")
+
 row.has.na <- apply(movieData1, 1, function(x){any(is.na(x))})
 numberOfNAs <- sum(row.has.na)
 
-print (c("can remove ", numberOfNAs , "from the table"))
+print (c("can remove ", numberOfNAs , "null rows from the table"))
+#removing the nulls
 movieData1 <- na.omit(movieData1)
 ```
 
@@ -123,14 +127,15 @@ print(c("total number of nulls", NAcounter))
 ```
 
 ```{r}
-#removing the rows that have NA in them
+#removing the '@NAcounter' number of rows that have NA in them
 movieData2 <- movieData1[-indicesToRemove,]
 # Now, movieData2 has no NA in any of the rows.
 
 movieData2[movieData2==""] <- NA
 row.has.na <- apply(movieData2, 1, function(x){any(is.na(x))})
 numberOfNAs <- sum(row.has.na)
-print(c("There are ",numberOfNAs, " rows with empty cells, so we are removing them"))
+paste("There are ",numberOfNAs, " rows with empty cells, so we are removing them")
+# removing the empty rows, (second round of filtering)
 movieData2 <- na.omit(movieData2)
 ```
 
@@ -139,7 +144,25 @@ movieData2 <- na.omit(movieData2)
 #couting the profits of a movie by subtracting the budget from the gross
 movieData2$profits <- movieData2$gross - movieData2$budget
 movieData3 <- movieData2[,c(c(1:13),48, c(14:47))]
-nearZeroVar(movieData3, saveMetrics = T)
+
+# movieData3 is the final cleaned data that also has a column showing the profits made by the movie
+#str(movieData3)
+stat <- nearZeroVar(movieData3, saveMetrics = T)
+class(stat$zeroVar)
+varDF <- cbind.data.frame(colnames(movieData3),stat$zeroVar)
+
+#converting logical to binary
+cols <- sapply(varDF, is.logical)
+varDF[,cols] <- lapply(varDF[,cols], as.numeric)
+
+# for ( i in 1:nrow(varDF)) {
+#  print(varDF[i,2]) 
+# }
+
+plot(varDF$`colnames(movieData3)`, varDF$`stat$zeroVar`, xlab = "predictors", ylab = "Zero - variance", main = "zero variance scores of different possible predictors")
+
+paste("we can see that all the columns have a zero score for the zero-variance score showing that all the columns can participate as a predictor in the prediction model")
+
 # We can see that none of the varibles have zero variance, so we can consider all the variables for study
 ```
 
@@ -161,11 +184,12 @@ movieData3$Metascore <- as.numeric(as.character(movieData3$Metascore))
 ```{r}
 # checking the correlation
 str(movieData3)
-cor(movieData3$imdb_score, movieData3[,c(7,12:26,38)], use = "pairwise.complete.obs")
+cor(movieData3$imdb_score, movieData3[,c(7,12:14,16:26,38)], use = "pairwise.complete.obs")
+colnames(movieData3)[c(7,12:14,16:26,38)]
 ```
 
 ```{r}
-cNames <- paste("movieData3$",colnames(movieData3)[c(7,12:26,38)], sep = "")
+cNames <- paste("movieData3$",colnames(movieData3)[c(7,12:14,16:26,38)], sep = "")
 cNames
 #formula contains all the columns that we want to include in the model
 formula <- as.formula(paste("y ~ ", paste(cNames, collapse= "+")))
@@ -191,6 +215,12 @@ vif(lmfit1.movieData)
 Looking at the Variance Inflation Factor of the fitted model, we can see that imdbVotes and num_voted_users are two largest VIFs. so we try to eliminate them and make the model again.
 
 ```{r}
+# coefficients of multi variate linear regression
+paste("coefficients of fitted line by linear regression")
+summary(lmfit1.movieData)$coefficients
+```
+
+```{r}
  lmfit2.movieData <- lm(movieData3$imdb_score ~ movieData3$cast_total_facebook_likes + movieData3$gross + movieData3$budget + movieData3$num_critic_for_reviews +movieData3$num_user_for_reviews + movieData3$tomatoUserRating + + movieData3$tomatoRating + movieData3$tomatoReviews + movieData3$tomatoFresh + movieData3$tomatoUserMeter + movieData3$tomatoUserReviews + movieData3$duration ,data = movieData3)
 
 summary(lmfit2.movieData)
@@ -212,22 +242,20 @@ RSFE
 absRSFE <- abs(RSFE)
 absRSFE
 length(RSFE_v)
-MAD <- absRSFE / length(RSFE_v)
-MAD
-print(c("Mean Absolute Deviation" , MAD))
+MSFE <- absRSFE / length(RSFE_v)
+MSFE
+mean(lmfit2.movieData$residuals^2)
 ```
 
 ```{r}
 # Analysing the linear regression model
-
 # log.movieData <- log(movieData3[, c(7,12:26,38)])
-
-
-trans = preProcess(movieData3[,c(7,12:26,38)], method=c("BoxCox", "center", "scale", "pca"))
+trans = preProcess(x = movieData3[,c(7,12:14,16:26,38)], method=c("BoxCox", "center", "scale", "pca"))
 trans
 trans$pcaComp
 
-pca.movieData <- prcomp(movieData3[,c(7,12:26,38)], center = TRUE, scale. = TRUE) 
+
+pca.movieData <- prcomp(x = movieData3[,c(7,12:14,16:26,38)], center = TRUE, scale. = TRUE) 
 print(pca.movieData)
 colnames(pca.movieData$rotation)
 summary(pca.movieData)
@@ -295,10 +323,10 @@ RSFE1
 absRSFE1 <- abs(RSFE1)
 absRSFE1
 length(RSFE_v1)
-MAD1 <- absRSFE1 / length(RSFE_v1)
-MAD1
-print(c("Mean Absolute Deviation for prediction using K means clustering" , MAD1))
-print(c("Mean Absolute Deviation for prediction using Linear Regression" , MAD))
+MSFE1 <- absRSFE1 / length(RSFE_v1)
+MSFE1
+
+mean(RSFE_v1^2)
 ```
 
 ```{r}
@@ -330,9 +358,11 @@ RSFE2
 absRSFE2 <- abs(RSFE2)
 absRSFE2
 length(RSFE_v1)
-MAD2 <- absRSFE2 / length(RSFE_v2)
+MSFE2 <- absRSFE2 / length(RSFE_v2)
 
-print(c("Mean Absolute Deviation for prediction using random forests" , MAD2))
-print(c("Mean Absolute Deviation for prediction using K means clustering" , MAD1))
-print(c("Mean Absolute Deviation for prediction using Linear Regression" , MAD))
+mean(rf.rfModel$mse)
+
+print(c("MSFE for prediction using random forests" , MSFE2))
+print(c("MSFE for prediction using K means clustering" , MSFE1))
+print(c("MSFE for prediction using Linear Regression" , MSFE))
 ```
