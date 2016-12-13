@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 # setting up the libraries
 # require(caTools)
+
 #Load packages
 # install.packages('ggrepel')
 # install.packages('dplyr')
@@ -77,15 +78,18 @@ Movie.Data$combinedNames = paste(Movie.Data$actor_1_name, Movie.Data$actor_2_nam
 ```
 
 ```{r}
-top.50.names <- as.list(sortedCombinedList[,"actorName"])
-length(top.50.names$actorName)
-top.50.names <- top.50.names$actorName[1:150]
-top.50.names
+top.150.names <- as.list(sortedCombinedList[,"actorName"])
+length(top.150.names$actorName)
+top.150.names <- top.150.names$actorName[1:150]
+top.150.names
 
 
 # now we need to find all the movies in which these top 50 actors acted
-top.50.names <- as.vector(top.50.names)
+top.150.names <- as.vector(top.150.names)
 names <- as.vector(Movie.Data$combinedNames)
+
+paste("here are the top 150 actors in our data!")
+print(top.150.names)
 ```
 
 
@@ -100,8 +104,8 @@ newdataframe
 newdataframe[1,1] <- "abcd"
 total <- 0
 
- for (i in 1: length(top.50.names)) {
-  singleName <- as.character(top.50.names[i])
+ for (i in 1: length(top.150.names)) {
+  singleName <- as.character(top.150.names[i])
   counter <- 0
   for(j in 1 : length(names)) {
     if(grepl(singleName, names[j])) {
@@ -122,11 +126,14 @@ write.csv(newdataframe, file = "dataPerActor.csv")
 
 newdataframe <- newdataframe[,1: length(newdataframe) - 1]
 colnames(newdataframe)[2] <- "movieNumber"
+
+paste("we now have converted the per movie data into per actor data")
 ```
 
 
 ```{r}
 # calculating a unified score for all the movies to give them a rank
+
 newdataframe$score <- ( 0.1 * (newdataframe$actor_1_facebook_likes + newdataframe$actor_2_facebook_likes + newdataframe$actor_3_facebook_likes + newdataframe$director_facebook_likes + newdataframe$movie_facebook_likes ) + 0.1 * newdataframe$profits + ((newdataframe$tomatoUserReviews/newdataframe$tomatoReviews) * 10 *(newdataframe$tomatoFresh - newdataframe$tomatoRotten) /(newdataframe$num_user_for_reviews * ( newdataframe$tomatoRating -  newdataframe$tomatoUserRating))))/ newdataframe$num_voted_users
 
 newdataframe$score <- as.integer(newdataframe$score)
@@ -138,12 +145,22 @@ numberOfNAs
 newdataframe <- na.omit(newdataframe)
 newdataframe[2,51] <- 87
 newdataframe[3,51] <- 37
+```
 
+```{r}
+paste("some statistics about the generated score")
 min(newdataframe$score)
 mean(newdataframe$score)
 sd(newdataframe$score)
 max(newdataframe$score)
 
-newdataframe$scoreCAT <- cut(newdataframe$score ,c(-15495, -10, 0,  50, 100, 150, 200, 250,500,750,1018))
-newdataframe$scoreLabel <- cut(newdataframe$score, seq(0, 1018, -15495), right = FALSE, labels = c('A','B','C','D','E','F','G','H','I','J'))
+```
+
+```{r}
+
+# we are categorising every score into the following classes: 1:10
+newdataframe$scoreCAT <- cut(newdataframe$score ,c(-15495, -10, 0,  50, 100, 150, 200, 250,500,750,1018), labels = 1:10)
+#score distribution
+table(newdataframe$scoreCAT)
+# newdataframe$scoreLabel <- cut(newdataframe$score, seq(0, 1018, -15495), right = FALSE, labels = c('A','B','C','D','E','F','G','H','I','J'))
 ```
