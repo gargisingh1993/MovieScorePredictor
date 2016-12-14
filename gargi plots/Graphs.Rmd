@@ -1,0 +1,47 @@
+---
+title: "Graphs"
+author: "Gargi Singh"
+date: "December 13, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/data')
+#Load all the necessary libraries
+library(RColorBrewer)
+library(tm)
+library(wordcloud)
+require("reshape2")
+require(ggplot2)
+require(dplyr)
+require(tidyr)
+require(gplots)
+require(gridExtra)
+
+# loads the movies data into a data frame
+data1 <- read.csv("cleanedMovieData.csv", header = TRUE)
+
+# plots the yearly average income
+
+data2 <- as.data.frame(data1)
+data2$new <- (data2$gross - data2$budget)
+data2 <- data2[order(data2$title_year),]
+data2 <- na.omit(data2)
+data3<- aggregate(data2[,50],list(data2$title_year),mean)
+plot(data3,xlab="year",ylab="average profits", ylim = c(-68783757,321057707), type='l', main = "Average profits over Time")
+
+# wordcloud
+wordcloud(data2$actor_1_name, random.order = T, colors = brewer.pal(8, "Dark2"), max.words = 200,scale = c(1.5,.5))
+wordcloud(data2$plot_keywords, random.order = T, colors = brewer.pal(8, "Dark2"), max.words = 200,scale = c(1.5,.5))
+
+# No of movies released each year, shows the increase in number of movies 
+data6 = data.frame(table(data2$title_year))
+plot(data6,xlab ="years",ylim = c(0,300),xlim = c(0,91),type='9',main = "Number of movies released over time")
+
+
+
+```
