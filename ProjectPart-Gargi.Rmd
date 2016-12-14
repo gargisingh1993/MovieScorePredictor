@@ -16,6 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #Load packages
 # install.packages('ggrepel')
 # install.packages('dplyr')
+library(plyr)
 library(dplyr)
 library(ggplot2)
 library(ggrepel)
@@ -30,8 +31,8 @@ library(ggbiplot,vqv)
 ```{r}
 # setting the working directory
 
-# setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data')
-setwd('/Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data/')
+setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data')
+#setwd('/Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data/')
 Movie.Data = read.csv("cleanedMovieData.csv")
 # head(Movie.Data)
 ```
@@ -41,7 +42,8 @@ Movie.Data = read.csv("cleanedMovieData.csv")
 # assumption that the currency is in USD
 #top 20 directors and 20 actors
 
-Movie.Data.directors.20 <- Movie.Data %>% group_by(director_name) %>% select(director_name, budget, gross,profits) %>% na.omit() %>% summarise(films = n(), budget = sum(as.numeric(budget)), gross = sum(as.numeric(gross)), profit = sum(as.numeric(profits))) %>% arrange(desc(profit)) %>% top_n(50, profit)
+
+
 
 Movie.Data.directors.20$profitPerMovie <- Movie.Data.directors.20$profit/Movie.Data.directors.20$films
 

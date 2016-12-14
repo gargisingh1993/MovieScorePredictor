@@ -29,8 +29,8 @@ library(ggbiplot,vqv)
 ```{r}
 # setting the working directory
 
-# setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data')
-setwd('/Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data/')
+setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data')
+#setwd('/Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data/')
 Movie.Data = read.csv("cleanedMovieData.csv")
 # head(Movie.Data)
 ```

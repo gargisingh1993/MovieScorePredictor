@@ -17,21 +17,23 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 # setting up the libraries
 # require(caTools)
-# install.packages('randomForest')
+#install.packages('xlsx')
 library(gdata)
 library(car)
 library(caret)
 library(caTools)
 library(ggbiplot,vqv)
 library(randomForest)
+#library(xlsx)
 ```
 
 ```{r}
 # setting the working directory
 # /Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data
-setwd('/Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data/')
+# 'C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data'
+setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data')
 movieData = read.xls("movie_data.xls")
-# head(movieData)
+#head(movieData)
 ```
 
 Loaded the data into a data frame 'movieData'
@@ -245,6 +247,11 @@ length(RSFE_v)
 MSFE <- absRSFE / length(RSFE_v)
 MSFE
 mean(lmfit2.movieData$residuals^2)
+
+
+# calculating mad 
+Madoriginal <- aad(movieData3$imdb_score,center = median(movieData3$imdb_score),constant = 1)
+MadRegression <- mad(predictedScore, center = median(predictedScore), constant = 1)
 ```
 
 ```{r}
@@ -331,6 +338,9 @@ length(RSFE_v1)
 MSFE1 <- absRSFE1 / length(RSFE_v1)
 MSFE1
 
+# calculating the mad
+madtest <- mad(test$imdb_score, center = median(test$imdb_score), constant = 1)
+madKmeans <- mad(clusters2, center = median(clusters2), constant = 1)
 ```
 
 ```{r}
@@ -369,13 +379,55 @@ MSFE2 <- absRSFE2 / length(RSFE_v2)
 
 mean(rf.rfModel$mse)
 
+# calculating median absolute deviation
+
+madtestrf <- mad(rfdf$imdb_score,center = median(rfdf$imdb_score),constant = 1)
+madpredictedrf <- mad(rf.predictedValues, center = median(rf.predictedValues), constant = 1)
+
 print(c("MSFE for prediction using random forests" , MSFE2))
 print(c("MSFE for prediction using K means clustering" , MSFE1))
 print(c("MSFE for prediction using Linear Regression" , MSFE))
+
+print(c("MAD for Original data:" , madtestrf))
+print(c("MAD for prediction using random forests" , madpredictedrf))
+print(c("MAD for Original data:" , madtestrf))
+print(c("MAD for prediction using K means clustering" , madKmeans))
+print(c("MAD for Original data:" , Madoriginal))
+print(c("MAD for prediction using Linear Regression" , MadRegression))
+
+```
+
+
+```{r}
+# Visualization of results 
+visualization <- as.data.frame(c(1:6))
+visualization$new <- c(1:6)
+colnames(visualization) <- c("MSFE","MAD")
+row.names(visualization) <- c("Original","Regression","Kmeans","Random Forest","x","y")
+visualization[1,1] <- 0
+visualization[2,1] <- MSFE
+visualization[3,1] <- MSFE1
+visualization[4,1] <- MSFE2
+visualization[1,2] <- Madoriginal
+visualization[2,2] <- MadRegression
+visualization[3,2] <- madKmeans
+visualization[4,2] <- madpredictedrf
+visualization <- visualization[c(1:4),]
+plot(as.factor(rownames(visualization)),visualization$MAD, xlab="Models", ylab="Calculated MAD Values", main ="original values vs Observed Values (MAD)")
+axis(2,at = c(0:5))
+plot(as.factor(rownames(visualization[c(1,2,4),])),visualization$MAD[c(1,2,4)], xlab="Models", ylab="Calculated MAD Values", main ="original  values vs Observed Values without Kmeans (MAD)")
+
+# Visualizing MSFE values
+plot(as.factor(rownames(visualization)),visualization$MSFE, xlab="Models", ylab="Calculated MSFE Values", main ="original values vs Observed Values (MSFE)")
+
+plot(as.factor(rownames(visualization[c(1,2,4),])),visualization$MSFE[c(1,2,4)], xlab="Models", ylab="Calculated MSFE Values", main ="original  values vs Observed Values without Kmeans (MSFE)")
+
 ```
 
 ```{r}
-paste("Looking at the MSFE values for all the three models, we can clearly see that the k-means clustering performed the worst among the three models. We can see that the linear regression model perfomed the best and second comes random forests")
+paste("Looking at the MSFE values for all the three models, we can clearly see that the k-means clustering performed the worst among the three models. We can see that the Multivariate linear regression model perfomed the best and second comes random forests")
 
 paste("order of performances: Linear Regression BETTER THAN Random Forests BETTER THAN K Means Clustering")
 ```
+
+
