@@ -5,12 +5,6 @@ author: "kvk229 & gsc326"
 date: "11/22/2016"
 output: html_document
 ---
-
-
-# GAM model general additive model
-# log linear regression
-<!-- https://rstudio-pubs-static.s3.amazonaws.com/33876_1d7794d9a86647ca90c4f182df93f0e8.html -->
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
