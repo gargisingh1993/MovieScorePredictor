@@ -1,15 +1,15 @@
 ---
-title: "Project"
-author: "Gargi Singh"
-date: "November 29, 2016"
-output: html_document
+title: "Actor - Genre Recommendation"
+author: "kvk229 and gsc326"
+date: "December 15, 2016"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r echo=FALSE, include=FALSE}
 # setting up the libraries
 # require(caTools)
 
@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # install.packages('dplyr')
 # install.packages('sqldf')
 library(sqldf)
+library(plyr)
 library(dplyr)
 library(ggplot2)
 library(ggrepel)
@@ -31,44 +32,47 @@ library(ggbiplot,vqv)
 
 ```{r}
 # setting the working directory
-
 # setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data')
-setwd('/Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data/')
+setwd('/Users/kkiran/Desktop/fall_2016/fds/project/FDSProject2016/data/')
 Movie.Data = read.csv("cleanedMovieData.csv")
-# head(Movie.Data)
 ```
 
-
+#### Getting the top 50 directors
 ```{r}
 # assumption that the currency is in USD
 #top 20 directors and 20 actors
 
-Movie.Data.directors.20 <- Movie.Data %>% group_by(director_name) %>% select(director_name, budget, gross,profits) %>% na.omit() %>% summarise(films = n(), budget = sum(as.numeric(budget)), gross = sum(as.numeric(gross)), profit = sum(as.numeric(profits))) %>% arrange(desc(profit)) %>% top_n(50, profit)
+Movie.Data.directors.50 <- Movie.Data %>% group_by(director_name) %>% select(director_name, budget, gross,profits) %>% na.omit() %>% summarise(films = n(), budget = sum(as.numeric(budget)), gross = sum(as.numeric(gross)), profit = sum(as.numeric(profits))) %>% arrange(desc(profit)) %>% top_n(50, profit)
 
-Movie.Data.directors.20$profitPerMovie <- Movie.Data.directors.20$profit/Movie.Data.directors.20$films
+```
 
-Movie.Data.1.actors.20 <- Movie.Data %>% group_by(actor_1_name) %>% select(actor_1_name, budget, gross,profits) %>% na.omit() %>% summarise(films = n(), budget = sum(as.numeric(budget)), gross = sum(as.numeric(gross)), profit = sum(as.numeric(profits))) %>% arrange(desc(profit)) %>% top_n(50, profit)
+#### Getting the top 150 actors
+```{r}
 
-Movie.Data.1.actors.20$profitPerMovie <- Movie.Data.1.actors.20$profit/Movie.Data.1.actors.20$films
+Movie.Data.directors.50$profitPerMovie <- Movie.Data.directors.50$profit/Movie.Data.directors.50$films
+
+Movie.Data.1.actors.50 <- Movie.Data %>% group_by(actor_1_name) %>% select(actor_1_name, budget, gross,profits) %>% na.omit() %>% summarise(films = n(), budget = sum(as.numeric(budget)), gross = sum(as.numeric(gross)), profit = sum(as.numeric(profits))) %>% arrange(desc(profit)) %>% top_n(50, profit)
+
+Movie.Data.1.actors.50$profitPerMovie <- Movie.Data.1.actors.50$profit/Movie.Data.1.actors.50$films
 
 
-Movie.Data.2.actors.20 <- Movie.Data %>% group_by(actor_2_name) %>% select(actor_2_name, budget, gross,profits) %>% na.omit() %>% summarise(films = n(), budget = sum(as.numeric(budget)), gross = sum(as.numeric(gross)), profit = sum(as.numeric(profits))) %>% arrange(desc(profit)) %>% top_n(50, profit)
+Movie.Data.2.actors.50 <- Movie.Data %>% group_by(actor_2_name) %>% select(actor_2_name, budget, gross,profits) %>% na.omit() %>% summarise(films = n(), budget = sum(as.numeric(budget)), gross = sum(as.numeric(gross)), profit = sum(as.numeric(profits))) %>% arrange(desc(profit)) %>% top_n(50, profit)
 
-Movie.Data.2.actors.20$profitPerMovie <- Movie.Data.2.actors.20$profit/Movie.Data.2.actors.20$films
+Movie.Data.2.actors.50$profitPerMovie <- Movie.Data.2.actors.50$profit/Movie.Data.2.actors.50$films
 
 
-Movie.Data.3.actors.20 <- Movie.Data %>% group_by(actor_3_name) %>% select(actor_3_name, budget, gross,profits) %>% na.omit() %>% summarise(films = n(), budget = sum(as.numeric(budget)), gross = sum(as.numeric(gross)), profit = sum(as.numeric(profits))) %>% arrange(desc(profit)) %>% top_n(50, profit)
+Movie.Data.3.actors.50 <- Movie.Data %>% group_by(actor_3_name) %>% select(actor_3_name, budget, gross,profits) %>% na.omit() %>% summarise(films = n(), budget = sum(as.numeric(budget)), gross = sum(as.numeric(gross)), profit = sum(as.numeric(profits))) %>% arrange(desc(profit)) %>% top_n(50, profit)
 
-Movie.Data.3.actors.20$profitPerMovie <- Movie.Data.3.actors.20$profit/Movie.Data.3.actors.20$films
+Movie.Data.3.actors.50$profitPerMovie <- Movie.Data.3.actors.50$profit/Movie.Data.3.actors.50$films
 
 ```
 
 ```{r}
 # combining the three lists to get the top 20/50 actors
-colnames(Movie.Data.1.actors.20)[1] <- 'actorName'
-colnames(Movie.Data.2.actors.20)[1] <- 'actorName'
-colnames(Movie.Data.3.actors.20)[1] <- 'actorName'
-combinedList <- rbind(Movie.Data.1.actors.20, Movie.Data.2.actors.20, Movie.Data.3.actors.20)
+colnames(Movie.Data.1.actors.50)[1] <- 'actorName'
+colnames(Movie.Data.2.actors.50)[1] <- 'actorName'
+colnames(Movie.Data.3.actors.50)[1] <- 'actorName'
+combinedList <- rbind(Movie.Data.1.actors.50, Movie.Data.2.actors.50, Movie.Data.3.actors.50)
 sortedCombinedList <- combinedList[order(-combinedList$profitPerMovie),]
 ```
 
@@ -80,17 +84,16 @@ Movie.Data$combinedNames = paste(Movie.Data$actor_1_name, Movie.Data$actor_2_nam
 ```
 
 ```{r}
+#converting to list
 top.150.names <- as.list(sortedCombinedList[,"actorName"])
 length(top.150.names$actorName)
 top.150.names <- top.150.names$actorName[1:150]
-top.150.names
 
-
-# now we need to find all the movies in which these top 50 actors acted
+# now we need to find all the movies in which these top 150 actors acted
 top.150.names <- as.vector(top.150.names)
 names <- as.vector(Movie.Data$combinedNames)
 
-paste("here are the top 150 actors in our data!")
+print("here are the top 150 actors in our data!")
 print(top.150.names)
 ```
 
@@ -102,8 +105,8 @@ newdataframe <- Movie.Data[0,]
 newdataframe <- rbind(newdataframe, Movie.Data[1,])
 newdataframe[,nameVector] <- NA
 newdataframe <- newdataframe[,c(51,1:50)]
-class(newdataframe)
-newdataframe
+# class(newdataframe)
+# newdataframe
 newdataframe[1,1] <- "abcd"
 total <- 0
 
@@ -130,7 +133,7 @@ write.csv(newdataframe, file = "dataPerActor.csv")
 newdataframe <- newdataframe[,1: length(newdataframe) - 1]
 colnames(newdataframe)[2] <- "movieNumber"
 
-paste("we now have converted the per movie data into per actor data")
+print("we now have converted the per movie data into per actor data")
 ```
 
 
@@ -140,7 +143,7 @@ paste("we now have converted the per movie data into per actor data")
 newdataframe$score <- ( 0.1 * (newdataframe$actor_1_facebook_likes + newdataframe$actor_2_facebook_likes + newdataframe$actor_3_facebook_likes + newdataframe$director_facebook_likes + newdataframe$movie_facebook_likes ) + 0.1 * newdataframe$profits + ((newdataframe$tomatoUserReviews/newdataframe$tomatoReviews) * 10 *(newdataframe$tomatoFresh - newdataframe$tomatoRotten) /(newdataframe$num_user_for_reviews * ( newdataframe$tomatoRating -  newdataframe$tomatoUserRating))))/ newdataframe$num_voted_users
 
 newdataframe$score <- as.integer(newdataframe$score)
-newdataframe %>% mutate_each_(funs(scale),vars=newdataframe$score) 
+# newdataframe %>% mutate_each_(funs(scale),vars=newdataframe$score) 
 
 row.has.na <- apply(newdataframe, 1, function(x){any(is.na(x))})
 numberOfNAs <- sum(row.has.na)
@@ -151,11 +154,11 @@ newdataframe[3,51] <- 37
 ```
 
 ```{r}
-paste("some statistics about the generated score")
-min(newdataframe$score)
-mean(newdataframe$score)
-sd(newdataframe$score)
-max(newdataframe$score)
+print("some statistics about the generated score")
+paste("minimum score ",min(newdataframe$score))
+paste("mean score ",mean(newdataframe$score))
+paste("standard deviation ",sd(newdataframe$score))
+paste("max score ",max(newdataframe$score))
 
 ```
 
@@ -165,18 +168,14 @@ max(newdataframe$score)
 newdataframe$scoreCAT <- cut(newdataframe$score ,c(-15495, -10, 0,  50, 100, 150, 200, 250,500,750,1018), labels = 1:10)
 #score distribution
 table(newdataframe$scoreCAT)
-# newdataframe$scoreLabel <- cut(newdataframe$score, seq(0, 1018, -15495), right = FALSE, labels = c('A','B','C','D','E','F','G','H','I','J'))
 ```
 
 
 
 ```{r}
-colnames(newdataframe)
 cNames <- paste("avg(",colnames(newdataframe),")", sep = "")
 # formula to generate the selectable columns in the select query
-formula <- paste(cNames, collapse= ",")
-formula
-
+# formula <- paste(cNames, collapse= ",")
 
 # "avg(mainActor),avg(movieNumber),avg(movie_title),avg(actor_1_facebook_likes),avg(actor_2_facebook_likes),avg(actor_3_facebook_likes),avg(director_facebook_likes),avg(movie_facebook_likes),avg(cast_total_facebook_likes),avg(director_name),avg(actor_1_name),avg(actor_2_name),avg(actor_3_name),avg(gross),avg(budget),avg(profits),avg(imdb_score),avg(num_critic_for_reviews),avg(num_user_for_reviews),avg(tomatoUserRating),avg(tomatoRating),avg(tomatoReviews),avg(tomatoFresh),avg(tomatoRotten),avg(tomatoUserMeter),avg(tomatoUserReviews),avg(num_voted_users),avg(imdbVotes),avg(Metascore),avg(genres),avg(facenumber_in_poster),avg(plot_keywords),avg(movie_imdb_link),avg(language),avg(country),avg(content_rating),avg(title_year),avg(aspect_ratio),avg(color),avg(duration),avg(Drama),avg(Comedy),avg(Thriller),avg(Action),avg(Romance),avg(Adventure),avg(Crime),avg(Sci.Fi),avg(Fantasy),avg(Horror),avg(score),avg(scoreCAT)"
 ```
@@ -204,7 +203,7 @@ wssplot <- function(actorCompleteData, nc=15, seed=1234) {
   }
 
 wssplot(actorCompleteData, nc=20)
-paste("looking at the within group and between group plots, we can see that the ideal number of clusters is 15 becuase the within groups sum of squares is no longer decreasing and between groups sum of squares is no longer increasing")
+print("looking at the within group and between group plots, we can see that the ideal number of clusters is 15 becuase the within groups sum of squares is no longer decreasing and between groups sum of squares is no longer increasing")
 
 #selected number of clusters : 15
 ```
@@ -213,11 +212,12 @@ paste("looking at the within group and between group plots, we can see that the 
 
 # applying k - means clustering on the 'avg' dataframe for every actor with 15 clusters
 k.means <- kmeans(actorCompleteData[,c(2:23)], 15)
-k.means
 
+print("sizes of each cluster")
 k.means$size
 # K-means clustering with 15 clusters of sizes 7, 1, 12, 10, 10, 8, 10, 6, 13, 11, 12, 17, 10, 5, 1
 
+print("cluster identifier for every row")
 k.means$cluster
 # Clustering vector:
 # 10  6  3  3  5  7  6 10  6 11 11 12  5  7 12  9 11  8 10  4  5 12  1  4  8  6  8  7 11  3  9  4  4
@@ -284,13 +284,23 @@ cat(whereIn)
 query <- ('select * from newdataframe where mainActor in ("Bruce Willis", "Channing Tatum", "Denzel Washington", "Dwayne Johnson", "Eddie Marsan", "Joseph Gordon-Levitt", "Kate Winslet", "Matt Damon", "Nathan Lane", "Steve Buscemi")')
 allMoviesData <- sqldf(query)
 
-```
-
-```{r}
 totals <- colSums(allMoviesData[,c(41:50)])
 totals <- sort(totals, decreasing = TRUE)
 totals 
-paste("we can see that dwyane Johnson should do his next movie in Drama or the Thriller Genre")
+grandTotal <- sum(totals)
+percentages_Dwyane <- totals/grandTotal * 100
+percentages_Dwyane
+
+
+query <- ('select * from newdataframe where mainActor = "Dwayne Johnson"')
+DJ_df <- sqldf(query)
+DJ_total <- colSums(DJ_df[,c(41:50)])
+DJ_total <- sort(DJ_total, decreasing = TRUE)
+print("we can see that dwyane Johnson should do his next movie in Drama or the Thriller Genre")
+print("The are the actual movies made by Dwayne Johnson")
+DJ_total
+print("As we expected that Dwayne Johnson is good at Drama and Comedy genres, he did more movies in those genres. Also, he did a lot of thriller movies which was not caught by our analysis")
+
 ```
 
 ####Actor: Daniel Radclieff
@@ -317,7 +327,22 @@ allMoviesData <- sqldf(query)
 totals <- colSums(allMoviesData[,c(41:50)])
 totals <- sort(totals, decreasing = TRUE)
 totals 
-paste("we can see that Daniel Radclieff should do his next movie in Drama or the Comedy Genre")
+grandTotal <- sum(totals)
+percentages_Daniel <- totals/grandTotal * 100
+percentages_Daniel
+
+query <- ('select * from newdataframe where mainActor = "Daniel Radcliffe"')
+DR_df <- sqldf(query)
+DR_total <- colSums(DR_df[,c(41:50)])
+DR_total <- sort(DR_total, decreasing = TRUE)
+print("we can see that Daniel Radclieff should do his next movie in Drama or the Comedy Genre")
+print("The are the actual movies made by Daneil Radcliffe")
+DR_total
+print("As we expected that Daniel Radcliffe is good at Drama and Comedy genres, he did more movies in those genres(excluding the comedy genre). Also, he did a lot of thriller movies which was not caught by our analysis")
+
+
+
+
 ```
 
 ####Actor: Will Smith
@@ -344,7 +369,19 @@ allMoviesData <- sqldf(query)
 totals <- colSums(allMoviesData[,c(41:50)])
 totals <- sort(totals, decreasing = TRUE)
 totals 
-paste("we can see that Will Smith should do his next movie in Drama or the Comedy Genre")
+grandTotal <- sum(totals)
+percentages_WillSmith <- totals/grandTotal * 100
+percentages_WillSmith
+
+query <- ('select * from newdataframe where mainActor = "Will Smith"')
+WS_df <- sqldf(query)
+WS_total <- colSums(WS_df[,c(41:50)])
+WS_total <- sort(WS_total, decreasing = TRUE)
+print("we can see that Will Smith should do his next movie in Drama or the Comedy Genre")
+print("The are the actual movies made by Will Smtih")
+WS_total
+print("As we expected that Will Smith is good at Drama and Comedy genres, he did more movies in those genres. Also, he did a lot of thriller movies which was not caught by our analysis. The acutal data also tells us that he is good at action genre which our model couldn't catch")
+
 ```
 
 ####Actor: Tom Cruse
@@ -371,7 +408,22 @@ allMoviesData <- sqldf(query)
 totals <- colSums(allMoviesData[,c(41:50)])
 totals <- sort(totals, decreasing = TRUE)
 totals 
-paste("we can see that Tom Cruse should do his next movie in Drama/Comedy Genre or Action Genre")
+grandTotal <- sum(totals)
+percentages_TomCruse <- totals/grandTotal * 100
+percentages_TomCruse
+
+
+query <- ('select * from newdataframe where mainActor = "Tom Cruise"')
+TC_df <- sqldf(query)
+TC_total <- colSums(TC_df[,c(41:50)])
+TC_total <- sort(TC_total, decreasing = TRUE)
+print("we can see that Tom Cruse should do his next movie in Drama/Comedy Genre or Action Genre")
+print("The are the actual movies made by Tom Cruse")
+TC_total
+print("As we expected that Tom Cruse is good at Drama and Comedy genres, he did more movies in those genres. Also, he did a lot of thriller movies which was not caught by our analysis")
+
+
+
 ```
 
 ####Actor: Robert De Nero
@@ -395,8 +447,111 @@ cat(whereIn)
 
 query <- ('select * from newdataframe where mainActor in ("J.K. Simmons", "Julia Roberts", "Kevin Spacey", "Robert De Niro", "Robert Duvall", "Will Ferrell")')
 allMoviesData <- sqldf(query)
+
 totals <- colSums(allMoviesData[,c(41:50)])
 totals <- sort(totals, decreasing = TRUE)
 totals 
-paste("we can see that Robert De Nero should do his next movie in Drama/Comedy Genre or Crime Genre")
+grandTotal <- sum(totals)
+percentages_Robert <- totals/grandTotal * 100
+percentages_Robert
+
+query <- ('select * from newdataframe where mainActor = "Robert De Niro"')
+RDN_df <- sqldf(query)
+RDN_total <- colSums(RDN_df[,c(41:50)])
+RDN_total <- sort(RDN_total, decreasing = TRUE)
+print("we can see that Robert De Nero should do his next movie in Drama/Comedy Genre or Crime Genre")
+print("The are the actual movies made by Robert De Nero")
+RDN_total
+print("As we expected that Robert De Nero is good at Drama, Crime and Comedy genres, he did more movies in those genres")
+```
+
+
+####Actor: Adam Sandler
+```{r}
+#repeating the analysis for another actor
+testData <- actorCompleteData[2,] # Adam Sandler is the 2nd actor in the list
+# we can see that Will Smith falls into the 6th cluster
+# finding the respective cluster for every actor in the testing data
+clusterResult <- apply(testData[,c(2:23)], 1, closest.cluster)
+clusterResult
+
+query <- sprintf("select mainActor from SortedactorCompleteData where clusterIndicator = %s",clusterResult)
+filteredActors <- sqldf(query)
+
+whereIn <- paste("\"",filteredActors,"\"", sep = "")
+nchar(whereIn)
+whereIn <- substring(whereIn,4,nchar(whereIn) - 2)
+whereIn
+#query string
+# cat(whereIn)
+
+
+query <- ('select * from newdataframe where mainActor in ("Adam Sandler", "Amy Poehler", "Anne Hathaway", "Christian Bale", "Heath Ledger", "Jon Hamm", "Matthew Broderick", "Morgan Freeman", "Steve Coogan", "Tom Cruise", "Vin Diesel")')
+allMoviesData <- sqldf(query)
+
+totals <- colSums(allMoviesData[,c(41:50)])
+totals <- sort(totals, decreasing = TRUE)
+totals 
+grandTotal <- sum(totals)
+grandTotal
+percentages_AdamSandler <- totals/grandTotal * 100
+percentages_AdamSandler
+
+query <- ('select * from newdataframe where mainActor = "Adam Sandler"')
+AS_df <- sqldf(query)
+AS_total <- colSums(AS_df[,c(41:50)])
+AS_total <- sort(AS_total, decreasing = TRUE)
+sum(AS_total)
+print("we can see that Adam Sandler should do his next movie in Comedy Genre or Drama Genre")
+print("The are the actual movies made by Robert De Nero")
+AS_total
+print("As we expected that Adam Sandler is good in the Comedy genre, and according to the model, his next film can also be in the Action/Drama genre")
+```
+
+
+
+```{r}
+#visualising the predictions for the top 5 actors
+print("these are the percentage likeliness for the top 5 actors in the top 10 genres")
+print("percentages for Robert De Nero")
+percentages_Robert
+print("percentages for Tom Cruse")
+percentages_TomCruse
+print("percentages for Will Smith")
+percentages_WillSmith
+print("percentages for Daniel Radcliffe")
+percentages_Daniel
+print("percentages for Dwayne Johnson")
+percentages_Dwyane
+print("percentages for Adam Sandler")
+percentages_AdamSandler
+
+
+```
+
+
+```{r}
+
+# colours <- c("red", "orange", "blue", "yellow", "green","pink", "purple", "magenta", "black", "gray")
+# combinedPercentages <-as.data.frame(cbind(percentages_Robert,percentages_TomCruse,percentages_WillSmith,percentages_Daniel,percentages_Dwyane))
+# colnames(combinedPercentages) <- c("Robert De Nero", "Tom Cruse", "Will Smith", "Daniel Radclieff" , "Dwyane Johnson")
+# barplot(as.matrix(combinedPercentages), main="All Actor Genre Likelihood ", xlab = " actors",ylab = "% Likelihood", ylim = c(0,25),cex.lab = 1.5, cex.main = 1.4, beside=TRUE, col=colours)
+# par(xpd=TRUE)
+# legend("topright", c("red", "orange", "blue", "yellow", "green","pink", "purple", "magenta", "black", "gray"), cex=1.3, inset=c(-0.1,-0.2),fill=colours)
+# par(xpd=FALSE)
+
+```
+
+```{r}
+barplot(percentages_Robert,xlab = "genres", ylab = "likeliness %",ylim = c(0,25),main = "Analysis for Robert De Nero",las = 2,border="red", density=c(100, 90, 80, 70, 60, 50, 40, 30, 20, 10))
+
+barplot(percentages_TomCruse,xlab = "genres", ylab = "likeliness %",ylim = c(0,25),main = "Analysis for Tom Cruse",las = 2,border="blue", density=c(100, 90, 80, 70, 60, 50, 40, 30, 20, 10))
+
+barplot(percentages_WillSmith,xlab = "genres", ylab = "likeliness %",ylim = c(0,25),main = "Analysis for Will Smith",las = 2,border="yellow", density=c(100, 90, 80, 70, 60, 50, 40, 30, 20, 10))
+
+barplot(percentages_Daniel,xlab = "genres", ylab = "likeliness %",ylim = c(0,25),main = "Analysis for Daniel Radclieff",las = 2,border="green", density=c(100, 90, 80, 70, 60, 50, 40, 30, 20, 10))
+
+barplot(percentages_Dwyane,xlab = "genres", ylab = "likeliness %",ylim = c(0,25),main = "Analysis for Dwayne Johnson",las = 2,border="orange", density=c(100, 90, 80, 70, 60, 50, 40, 30, 20, 10))
+
+barplot(percentages_AdamSandler,xlab = "genres", ylab = "likeliness %",ylim = c(0,25),main = "Analysis for Adam Sandler",las = 2,border="red", density=c(100, 90, 80, 70, 60, 50, 40, 30, 20, 10))
 ```
