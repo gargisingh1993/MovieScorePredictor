@@ -1,6 +1,6 @@
 ---
-title: "Project"
-author: "Kiran Karpurapu"
+title: "Are Facebook likes, profits and movie reviews accurate predictors for IMDB score?"
+author: "kvk229 & gsc326"
 date: "11/22/2016"
 output: pdf_document
 ---
@@ -14,7 +14,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r echo=FALSE, include=FALSE}
 # setting up the libraries
 # require(caTools)
 #install.packages('xlsx')
@@ -29,9 +29,9 @@ library(randomForest)
 
 ```{r}
 # setting the working directory
-# /Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data
+setwd('/Users/kkiran/Desktop/fall_2016/fds/project/MovieScorePredictor/data')
 # 'C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data'
-setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data')
+# setwd('C:/Users/gogs/Documents/GitHub/MovieScorePredictor/Data')
 movieData = read.xls("movie_data.xls")
 #head(movieData)
 ```
@@ -115,16 +115,16 @@ index <- 1
 # this is the working version 
 for (i in 1 : nrow(movieData1)) {
   if (any(movieData1[i,] == "N/A")) {
-     print (c(i, "yes" , movieData1[i,]))
+     # print (c(i, "yes" , movieData1[i,]))
     indicesToRemove[index] = i;
     index <- index + 1
     NAcounter <- NAcounter + 1
-  } else
-    print ("no")
+  } 
+    # print ("no")
 }
 
 print(length(indicesToRemove))
-print(indicesToRemove)
+# print(indicesToRemove)
 print(c("total number of nulls", NAcounter))
 ```
 
@@ -185,17 +185,17 @@ movieData3$Metascore <- as.numeric(as.character(movieData3$Metascore))
 
 ```{r}
 # checking the correlation
-str(movieData3)
+# str(movieData3)
 cor(movieData3$imdb_score, movieData3[,c(7,12:14,16:26,38)], use = "pairwise.complete.obs")
 colnames(movieData3)[c(7,12:14,16:26,38)]
 ```
 
 ```{r}
 cNames <- paste("movieData3$",colnames(movieData3)[c(7,12:14,16:26,38)], sep = "")
-cNames
+# cNames
 #formula contains all the columns that we want to include in the model
 formula <- as.formula(paste("y ~ ", paste(cNames, collapse= "+")))
-formula
+# formula
 ```
 
 
@@ -210,7 +210,7 @@ formula
 
 lmfit1.movieData <- lm(movieData3$imdb_score ~ movieData3$cast_total_facebook_likes + movieData3$gross + movieData3$budget + movieData3$num_critic_for_reviews +movieData3$num_user_for_reviews + movieData3$tomatoUserRating + + movieData3$tomatoRating + movieData3$tomatoReviews + movieData3$tomatoFresh + movieData3$tomatoUserMeter + movieData3$tomatoUserReviews + movieData3$num_voted_users +  movieData3$imdbVotes + movieData3$duration ,data = movieData3)
 
-summary(lmfit1.movieData)
+# summary(lmfit1.movieData)
 
 vif(lmfit1.movieData)
 ```
@@ -219,13 +219,13 @@ Looking at the Variance Inflation Factor of the fitted model, we can see that im
 ```{r}
 # coefficients of multi variate linear regression
 paste("coefficients of fitted line by linear regression")
-summary(lmfit1.movieData)$coefficients
+# summary(lmfit1.movieData)$coefficients
 ```
 
 ```{r}
  lmfit2.movieData <- lm(movieData3$imdb_score ~ movieData3$cast_total_facebook_likes + movieData3$gross + movieData3$budget + movieData3$num_critic_for_reviews +movieData3$num_user_for_reviews + movieData3$tomatoUserRating + + movieData3$tomatoRating + movieData3$tomatoReviews + movieData3$tomatoFresh + movieData3$tomatoUserMeter + movieData3$tomatoUserReviews + movieData3$duration ,data = movieData3)
 
-summary(lmfit2.movieData)
+# summary(lmfit2.movieData)
 
 lmfit2.movieData
 
@@ -236,21 +236,21 @@ vif(lmfit2.movieData)
 ```{r}
 #calculating the MSFE and MAD for the predicted values
 predictedScore <- predict(lmfit2.movieData)
-predictedScore
+# predictedScore
 RSFE_v <- movieData3$imdb_score - predictedScore
-RSFE_v
+# RSFE_v
 RSFE <- sum(RSFE_v)
-RSFE
+# RSFE
 absRSFE <- abs(RSFE)
-absRSFE
+# absRSFE
 length(RSFE_v)
 MSFE <- absRSFE / length(RSFE_v)
-MSFE
+# MSFE
 mean(lmfit2.movieData$residuals^2)
 
 
 # calculating mad 
-Madoriginal <- aad(movieData3$imdb_score,center = median(movieData3$imdb_score),constant = 1)
+Madoriginal <- mad(movieData3$imdb_score,center = median(movieData3$imdb_score),constant = 1)
 MadRegression <- mad(predictedScore, center = median(predictedScore), constant = 1)
 ```
 
@@ -265,7 +265,7 @@ trans$pcaComp
 pca.movieData <- prcomp(x = movieData3[,c(7,12:14,16:26,38)], center = TRUE, scale. = TRUE) 
 print(pca.movieData)
 colnames(pca.movieData$rotation)
-summary(pca.movieData)
+# summary(pca.movieData)
 pca.movieData
 plot(pca.movieData, type = "l", main = "PCA Movie Data")
 ```
@@ -308,7 +308,7 @@ paste("The dimensions of the testing data are")
 dim(test)
 k.means.fit <- kmeans(train[,c(7,12:14,16:26,38)], 20)
 k.means.fit$centers
-k.means.fit$cluster
+# k.means.fit$cluster
 k.means.fit$size
 
 kmeansPrediction <- as.data.frame(k.means.fit$centers)
@@ -317,8 +317,8 @@ kmeansPrediction
 
 closest.cluster <- function(x) {
   cluster.dist <- apply(k.means.fit$centers, 1, function(y) sqrt(sum((x-y)^2)))
-  print(c( "cluster: " ,(which.min(cluster.dist)[1]), kmeansPrediction[which.min(cluster.dist)[1]]))
-  print( kmeansPrediction[which.min(cluster.dist)[1]])
+  # print(c( "cluster: " ,(which.min(cluster.dist)[1]), kmeansPrediction[which.min(cluster.dist)[1]]))
+  # print( kmeansPrediction[which.min(cluster.dist)[1]])
   return (kmeansPrediction[which.min(cluster.dist)[1]])
 }
 
@@ -329,9 +329,9 @@ clusters2 <- apply(test[,c(7,12:14,16:26,38)], 1, closest.cluster)
 ```{r}
 # analysis of k means clustering approach
 RSFE_v1 <- test$imdb_score - clusters2
-RSFE_v1
+# RSFE_v1
 RSFE1 <- sum(RSFE_v1)
-RSFE1
+# RSFE1
 absRSFE1 <- abs(RSFE1)
 absRSFE1
 length(RSFE_v1)
@@ -365,13 +365,13 @@ rf.rfModel
 #validating the random forest model
 #RMSE
 rf.predictedValues <- predict(rf.rfModel, rfdf)
-rf.predictedValues
+# rf.predictedValues
 
 
 RSFE_v2 <- rfdf$imdb_score - rf.predictedValues
-RSFE_v2
+# RSFE_v2
 RSFE2 <- sum(RSFE_v2)
-RSFE2
+# RSFE2
 absRSFE2 <- abs(RSFE2)
 absRSFE2
 length(RSFE_v1)
