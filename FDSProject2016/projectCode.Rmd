@@ -1,8 +1,9 @@
 ---
-title: "Are Facebook likes, profits and movie reviews accurate predictors for IMDB score?"
+title: Are Facebook likes, profits and movie reviews accurate predictors for IMDB
+  score?
 author: "kvk229 & gsc326"
 date: "11/22/2016"
-output: pdf_document
+output: html_document
 ---
 
 
@@ -270,7 +271,7 @@ pca.movieData
 plot(pca.movieData, type = "l", main = "PCA Movie Data")
 ```
 
-```{r}
+```{r warning= FALSE}
 
 wssplot <- function(data, nc=15, seed=1234) {
   wss <- (nrow(data)-1)*sum(apply(data,2,var))
@@ -282,9 +283,9 @@ wssplot <- function(data, nc=15, seed=1234) {
     }
   
   plot(1:nc, wss, type="b", xlab="Number of Clusters",
-       ylab="Within groups sum of squares")
+       ylab="Within groups sum of squares", main = "chosing number of clusters")
   plot(1:nc, bss, type="b", xlab="Number of Clusters",
-       ylab="Between groups sum of squares")
+       ylab="Between groups sum of squares", main = "chosing number of clusters")
   }
 
 wssplot(movieData3, nc=35)
